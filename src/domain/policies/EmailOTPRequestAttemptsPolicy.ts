@@ -1,5 +1,5 @@
 const MAX_FAILED_ATTEMPTS = 10
-const LOCK_DELAY_MS = 60 * 1000
+const LOCK_DELAY_MS = 60 * 60 * 1000
 
 export class EmailOTPRequestAttemptsPolicy {
   getDelayMs(failedAttempts: number): number {

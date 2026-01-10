@@ -1,5 +1,5 @@
-const INITIAL_DELAY_MS = 12 * 1000
-const LONG_DELAY_MS = 60 * 1000
+const INITIAL_DELAY_MS = 120 * 1000
+const LONG_DELAY_MS = 60 * 60 * 1000
 const MAX_SHORT_DELAY_REQUESTS = 2
 
 export class EmailOTPRequestPolicy {
