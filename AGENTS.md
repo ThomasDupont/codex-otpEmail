@@ -17,3 +17,4 @@
 - Tests : always write test on new code
   - Always write passing tests
   - Always write no-passing tests
+  - Respect pattern AAA (Arrange / Act / Assert) for tests
