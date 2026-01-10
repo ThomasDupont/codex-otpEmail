@@ -1,6 +1,8 @@
 import { Email } from '../valueObjects/Email.js'
 import { EmailOTPRequestPolicy } from '../policies/EmailOTPRequestPolicy.js'
+import { timingSafeEqual } from 'node:crypto'
 import { EmailOTPRequestAttemptsPolicy } from '../policies/EmailOTPRequestAttemptsPolicy.js'
+import { EmailOTPRequestValidationPolicy } from '../policies/EmailOTPRequestValidationPolicy.js'
 
 const VALIDITY_DURATION_MS = 60 * 60 * 1000
 
@@ -100,6 +102,29 @@ export class EmailOTPRequest {
 
   getFailedAttempts(): number {
     return this.failedAttempts
+  }
+
+  incrementFailedAttempts(): EmailOTPRequest {
+    return new EmailOTPRequest(
+      this.email,
+      this.requestedAt,
+      this.expiresAt,
+      this.passcode,
+      this.failedAttempts + 1,
+    )
+  }
+
+  validate(params: {
+    inputPasscode: string
+    policy?: EmailOTPRequestValidationPolicy
+  }): { isValid: boolean } {
+    const { inputPasscode, policy = new EmailOTPRequestValidationPolicy() } = params
+    policy.assertCanValidate(this.failedAttempts)
+    const isValid = timingSafeEqual(
+      Buffer.from(this.passcode),
+      Buffer.from(inputPasscode),
+    )
+    return { isValid }
   }
 
   isValid(at: Date): boolean {

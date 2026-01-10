@@ -156,4 +156,86 @@ describe('EmailOTPRequest', () => {
     expect(request.getPasscode()).toBe(passcode)
     expect(request.getFailedAttempts()).toBe(failedAttempts)
   })
+
+  it('validates the passcode when attempts are available', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const email = Email.create('user@example.com')
+    const passcode = '654321'
+    const failedAttempts = 9
+
+    // Act
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
+    const result = request.validate({ inputPasscode: '654321' })
+
+    // Assert
+    expect(result.isValid).toBe(true)
+  })
+
+  it('returns invalid when the passcode does not match', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const email = Email.create('user@example.com')
+    const passcode = '654321'
+    const failedAttempts = 0
+
+    // Act
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
+    const result = request.validate({ inputPasscode: '000000' })
+
+    // Assert
+    expect(result.isValid).toBe(false)
+  })
+
+  it('throws when attempts exceed the limit during validation', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const email = Email.create('user@example.com')
+    const passcode = '654321'
+    const failedAttempts = 10
+
+    // Act
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
+
+    // Assert
+    expect(() => request.validate({ inputPasscode: '654321' })).toThrow(
+      'Nombre maximum de tentatives atteint',
+    )
+  })
+
+  it('increments failed attempts when called', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const email = Email.create('user@example.com')
+    const passcode = '654321'
+    const failedAttempts = 3
+
+    // Act
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
+    const nextRequest = request.incrementFailedAttempts()
+
+    // Assert
+    expect(nextRequest.getFailedAttempts()).toBe(4)
+    expect(request.getFailedAttempts()).toBe(3)
+  })
 })
