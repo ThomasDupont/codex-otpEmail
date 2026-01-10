@@ -1,4 +1,5 @@
 import { EmailOTPRequest } from '../../domain/entities/EmailOTPRequest.js'
+import { Email } from '../../domain/valueObjects/Email.js'
 
 export type EmailOTPRequestRepositoryResult = {
   repository: EmailOTPRequestRepository
@@ -8,6 +9,9 @@ export type EmailOTPRequestRepositoryResult = {
 export interface EmailOTPRequestRepository {
   create(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult
   read(params: { request: EmailOTPRequest }): EmailOTPRequest
+  readLatestByEmail(params: {
+    email: Email
+  }): { request: EmailOTPRequest; count: number } | null
   update(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult
   delete(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult
 }
@@ -38,6 +42,24 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
       throw new Error('Email OTP request not found')
     }
     return stored
+  }
+
+  readLatestByEmail(params: {
+    email: Email
+  }): { request: EmailOTPRequest; count: number } | null {
+    const { email } = params
+    const matches = [...this.items.values()].filter(
+      (request) => request.getEmail().getValue() === email.getValue(),
+    )
+    if (matches.length === 0) {
+      return null
+    }
+    const latest = matches.reduce((current, candidate) =>
+      candidate.getRequestedAt().getTime() > current.getRequestedAt().getTime()
+        ? candidate
+        : current,
+    )
+    return { request: latest, count: matches.length }
   }
 
   update(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult {

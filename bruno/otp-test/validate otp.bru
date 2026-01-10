@@ -1,0 +1,24 @@
+meta {
+  name: validate otp
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:3000/otp/validation
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "test@test.com",
+    "requestedAt": "2026-01-10T19:30:10.355Z",
+    "inputPasscode": "528595"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

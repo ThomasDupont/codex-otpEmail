@@ -62,4 +62,31 @@ describe('InMemoryEmailOTPRequestRepository', () => {
       'Email OTP request not found',
     )
   })
+
+  it('reads the latest request for an email', () => {
+    // Arrange
+    const repository = new InMemoryEmailOTPRequestRepository()
+    const email = Email.create('user@example.com')
+    const firstRequest = EmailOTPRequest.create({
+      email,
+      requestedAt: new Date('2024-01-01T00:00:00.000Z'),
+      passcode: '111111',
+      failedAttempts: 0,
+    })
+    const secondRequest = EmailOTPRequest.create({
+      email,
+      requestedAt: new Date('2024-01-01T01:00:00.000Z'),
+      passcode: '222222',
+      failedAttempts: 1,
+    })
+
+    // Act
+    const createdFirst = repository.create({ request: firstRequest })
+    const createdSecond = createdFirst.repository.create({ request: secondRequest })
+    const latest = createdSecond.repository.readLatestByEmail({ email })
+
+    // Assert
+    expect(latest?.count).toBe(2)
+    expect(latest?.request.getPasscode()).toBe('222222')
+  })
 })
