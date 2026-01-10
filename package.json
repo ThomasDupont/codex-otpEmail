@@ -1,0 +1,32 @@
+{
+  "name": "emailotp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch ./src/main.ts",
+    "test": "vitest run",
+    "build": "tsc --build .",
+    "lint": "eslint .",
+    "check": "npm run build && npm run lint && npm run test"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.5",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.52.0",
+    "vitest": "^4.0.16"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
