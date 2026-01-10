@@ -8,16 +8,32 @@ export class EmailOTPRequest {
   private readonly email: Email
   private readonly requestedAt: Date
   private readonly expiresAt: Date
+  private readonly passcode: string
+  private readonly failedAttempts: number
 
-  private constructor(email: Email, requestedAt: Date, expiresAt: Date) {
+  private constructor(
+    email: Email,
+    requestedAt: Date,
+    expiresAt: Date,
+    passcode: string,
+    failedAttempts: number,
+  ) {
     this.email = email
     this.requestedAt = requestedAt
     this.expiresAt = expiresAt
+    this.passcode = passcode
+    this.failedAttempts = failedAttempts
   }
 
-  static create(email: Email, requestedAt: Date): EmailOTPRequest {
+  static create(params: {
+    email: Email
+    requestedAt: Date
+    passcode: string
+    failedAttempts: number
+  }): EmailOTPRequest {
+    const { email, requestedAt, passcode, failedAttempts } = params
     const expiresAt = new Date(requestedAt.getTime() + VALIDITY_DURATION_MS)
-    return new EmailOTPRequest(email, requestedAt, expiresAt)
+    return new EmailOTPRequest(email, requestedAt, expiresAt, passcode, failedAttempts)
   }
 
   static createWithWait(params: {
@@ -28,6 +44,8 @@ export class EmailOTPRequest {
     policy?: EmailOTPRequestPolicy
     previousFailedAttempts?: number
     attemptsPolicy?: EmailOTPRequestAttemptsPolicy
+    passcode: string
+    failedAttempts: number
   }): { request: EmailOTPRequest; waitMs: number; nextAllowedAt: Date } {
     const {
       email,
@@ -37,6 +55,8 @@ export class EmailOTPRequest {
       policy = new EmailOTPRequestPolicy(),
       previousFailedAttempts = 0,
       attemptsPolicy = new EmailOTPRequestAttemptsPolicy(),
+      passcode,
+      failedAttempts,
     } = params
     const attemptsDelayMs = attemptsPolicy.getDelayMs(previousFailedAttempts)
     if (previousRequestCount > 0 || attemptsDelayMs > 0) {
@@ -50,7 +70,12 @@ export class EmailOTPRequest {
         attemptsPolicy.assertCanRequest(previousFailedAttempts, lastRequestedAt, requestedAt)
       }
     }
-    const request = EmailOTPRequest.create(email, requestedAt)
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
     const requestDelayMs = policy.getNextDelayMs(previousRequestCount + 1)
     const waitMs = requestDelayMs
     const nextAllowedAt = new Date(requestedAt.getTime() + waitMs)
@@ -67,6 +92,14 @@ export class EmailOTPRequest {
 
   getExpiresAt(): Date {
     return this.expiresAt
+  }
+
+  getPasscode(): string {
+    return this.passcode
+  }
+
+  getFailedAttempts(): number {
+    return this.failedAttempts
   }
 
   isValid(at: Date): boolean {

@@ -7,9 +7,16 @@ describe('EmailOTPRequest', () => {
     // Arrange
     const requestedAt = new Date('2024-01-01T00:00:00.000Z')
     const email = Email.create('user@example.com')
+    const passcode = '123456'
+    const failedAttempts = 0
 
     // Act
-    const request = EmailOTPRequest.create(email, requestedAt)
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
 
     // Assert
     expect(request.getRequestedAt().toISOString()).toBe(requestedAt.toISOString())
@@ -24,6 +31,8 @@ describe('EmailOTPRequest', () => {
     const requestedAt = new Date('2024-01-01T00:02:00.000Z')
     const email = Email.create('user@example.com')
     const lastRequestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const passcode = '123456'
+    const failedAttempts = 0
 
     // Act
     const result = EmailOTPRequest.createWithWait({
@@ -31,6 +40,8 @@ describe('EmailOTPRequest', () => {
       previousRequestCount: 1,
       requestedAt,
       lastRequestedAt,
+      passcode,
+      failedAttempts,
     })
 
     // Assert
@@ -43,6 +54,8 @@ describe('EmailOTPRequest', () => {
     const requestedAt = new Date('2024-01-01T00:01:00.000Z')
     const email = Email.create('user@example.com')
     const lastRequestedAt = new Date('2024-01-01T00:00:30.000Z')
+    const passcode = '123456'
+    const failedAttempts = 0
 
     // Act + Assert
     expect(() =>
@@ -51,6 +64,8 @@ describe('EmailOTPRequest', () => {
         previousRequestCount: 1,
         requestedAt,
         lastRequestedAt,
+        passcode,
+        failedAttempts,
       }),
     ).toThrow('Hors delai pour la demande')
   })
@@ -60,6 +75,8 @@ describe('EmailOTPRequest', () => {
     const requestedAt = new Date('2024-01-01T00:30:00.000Z')
     const email = Email.create('user@example.com')
     const lastRequestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const passcode = '123456'
+    const failedAttempts = 0
 
     // Act + Assert
     expect(() =>
@@ -68,6 +85,8 @@ describe('EmailOTPRequest', () => {
         previousRequestCount: 3,
         requestedAt,
         lastRequestedAt,
+        passcode,
+        failedAttempts,
       }),
     ).toThrow('Hors delai pour la demande')
   })
@@ -77,6 +96,8 @@ describe('EmailOTPRequest', () => {
     const requestedAt = new Date('2024-01-01T00:30:00.000Z')
     const email = Email.create('user@example.com')
     const lastRequestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const passcode = '123456'
+    const failedAttempts = 0
 
     // Act + Assert
     expect(() =>
@@ -86,6 +107,8 @@ describe('EmailOTPRequest', () => {
         previousFailedAttempts: 11,
         requestedAt,
         lastRequestedAt,
+        passcode,
+        failedAttempts,
       }),
     ).toThrow('Hors delai pour la demande')
   })
@@ -95,6 +118,8 @@ describe('EmailOTPRequest', () => {
     const requestedAt = new Date('2024-01-01T01:00:00.000Z')
     const email = Email.create('user@example.com')
     const lastRequestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const passcode = '123456'
+    const failedAttempts = 0
 
     // Act
     const result = EmailOTPRequest.createWithWait({
@@ -103,10 +128,32 @@ describe('EmailOTPRequest', () => {
       previousFailedAttempts: 11,
       requestedAt,
       lastRequestedAt,
+      passcode,
+      failedAttempts,
     })
 
     // Assert
     expect(result.waitMs).toBe(120000)
     expect(result.nextAllowedAt.toISOString()).toBe('2024-01-01T01:02:00.000Z')
+  })
+
+  it('stores passcode and failed attempts', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T00:00:00.000Z')
+    const email = Email.create('user@example.com')
+    const passcode = '654321'
+    const failedAttempts = 2
+
+    // Act
+    const request = EmailOTPRequest.create({
+      email,
+      requestedAt,
+      passcode,
+      failedAttempts,
+    })
+
+    // Assert
+    expect(request.getPasscode()).toBe(passcode)
+    expect(request.getFailedAttempts()).toBe(failedAttempts)
   })
 })
