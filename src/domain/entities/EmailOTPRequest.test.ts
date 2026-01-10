@@ -71,4 +71,42 @@ describe('EmailOTPRequest', () => {
       }),
     ).toThrow('Hors delai pour la demande')
   })
+
+  it('throws when attempts exceed the limit before 60 minutes', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T00:30:00.000Z')
+    const email = Email.create('user@example.com')
+    const lastRequestedAt = new Date('2024-01-01T00:00:00.000Z')
+
+    // Act + Assert
+    expect(() =>
+      EmailOTPRequest.createWithWait({
+        email,
+        previousRequestCount: 1,
+        previousFailedAttempts: 11,
+        requestedAt,
+        lastRequestedAt,
+      }),
+    ).toThrow('Hors delai pour la demande')
+  })
+
+  it('allows a new request after 60 minutes and returns the normal delay', () => {
+    // Arrange
+    const requestedAt = new Date('2024-01-01T01:00:00.000Z')
+    const email = Email.create('user@example.com')
+    const lastRequestedAt = new Date('2024-01-01T00:00:00.000Z')
+
+    // Act
+    const result = EmailOTPRequest.createWithWait({
+      email,
+      previousRequestCount: 1,
+      previousFailedAttempts: 11,
+      requestedAt,
+      lastRequestedAt,
+    })
+
+    // Assert
+    expect(result.waitMs).toBe(120000)
+    expect(result.nextAllowedAt.toISOString()).toBe('2024-01-01T01:02:00.000Z')
+  })
 })
