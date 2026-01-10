@@ -18,3 +18,5 @@
   - Always write passing tests
   - Always write no-passing tests
   - Respect pattern AAA (Arrange / Act / Assert) for tests
+- In functions, beyond 3 parameters, use an object instead of a parameter list.
+- All functions must be pure.
