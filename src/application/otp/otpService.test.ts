@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { Email } from '../../domain/valueObjects/Email.js'
 import { EmailOTPRequest } from '../../domain/entities/EmailOTPRequest.js'
-import { InMemoryEmailOTPRequestRepository } from '../../infrastructure/otp/EmailOTPRequestRepository.js'
+import { createInMemoryEmailOTPRequestRepository } from '../../infrastructure/otp/EmailOTPRequestRepository.js'
 import { createOtpRequest, validateOtpRequest } from './otpService.js'
 
 describe('otpService', () => {
   it('creates and persists an OTP request', () => {
     // Arrange
-    const repository = new InMemoryEmailOTPRequestRepository()
+    const repository = createInMemoryEmailOTPRequestRepository({ state: new Map() })
     const clock = { now: () => new Date('2024-01-01T00:00:00.000Z') }
     const passcodeGenerator = () => '123456'
 
@@ -20,7 +20,7 @@ describe('otpService', () => {
       clock,
       passcodeGenerator,
     })
-    const stored = result.repository.read({ request: result.request })
+    const stored = repository.read({ request: result.request })
 
     // Assert
     expect(stored.getPasscode()).toBe('123456')
@@ -36,7 +36,8 @@ describe('otpService', () => {
       passcode: '654321',
       failedAttempts: 0,
     })
-    const repository = new InMemoryEmailOTPRequestRepository().create({ request }).repository
+    const repository = createInMemoryEmailOTPRequestRepository({ state: new Map() })
+    repository.create({ request })
 
     // Act
     const result = validateOtpRequest({
@@ -60,7 +61,8 @@ describe('otpService', () => {
       passcode: '654321',
       failedAttempts: 2,
     })
-    const repository = new InMemoryEmailOTPRequestRepository().create({ request }).repository
+    const repository = createInMemoryEmailOTPRequestRepository({ state: new Map() })
+    repository.create({ request })
 
     // Act
     const result = validateOtpRequest({

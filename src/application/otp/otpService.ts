@@ -7,7 +7,6 @@ export type Clock = {
 }
 
 export type CreateOtpRequestResult = {
-  repository: EmailOTPRequestRepository
   request: EmailOTPRequest
   waitMs: number
   nextAllowedAt: Date
@@ -46,10 +45,9 @@ export const createOtpRequest = (params: {
     ...(lastRequestedAt ? { lastRequestedAt } : {}),
   }
   const result = EmailOTPRequest.createWithWait(requestParams)
-  const created = repository.create({ request: result.request })
+  repository.create({ request: result.request })
 
   return {
-    repository: created.repository,
     request: result.request,
     waitMs: result.waitMs,
     nextAllowedAt: result.nextAllowedAt,
@@ -57,7 +55,6 @@ export const createOtpRequest = (params: {
 }
 
 export type ValidateOtpRequestResult = {
-  repository: EmailOTPRequestRepository
   isValid: boolean
   failedAttempts: number
 }
@@ -81,16 +78,14 @@ export const validateOtpRequest = (params: {
 
   if (!validation.isValid) {
     const updated = stored.incrementFailedAttempts()
-    const result = repository.update({ request: updated })
+    repository.update({ request: updated })
     return {
-      repository: result.repository,
       isValid: false,
       failedAttempts: updated.getFailedAttempts(),
     }
   }
 
   return {
-    repository,
     isValid: true,
     failedAttempts: stored.getFailedAttempts(),
   }

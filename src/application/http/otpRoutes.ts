@@ -10,8 +10,7 @@ export const registerOtpRoutes = (params: {
   clock: Clock
   passcodeGenerator: () => string
 }): void => {
-  const { app, clock, passcodeGenerator } = params
-  let repository = params.repository
+  const { app, clock, passcodeGenerator, repository } = params
 
   app.post('/otp/request', (req, res) => {
     try {
@@ -35,7 +34,6 @@ export const registerOtpRoutes = (params: {
         ...(lastRequestedAt ? { lastRequestedAt } : {}),
       }
       const result = createOtpRequest(requestParams)
-      repository = result.repository
       res.json({
         email: result.request.getEmail().getValue(),
         requestedAt: result.request.getRequestedAt().toISOString(),
@@ -63,7 +61,6 @@ export const registerOtpRoutes = (params: {
         inputPasscode: body.inputPasscode,
         repository,
       })
-      repository = result.repository
       res.json({
         isValid: result.isValid,
         failedAttempts: result.failedAttempts,

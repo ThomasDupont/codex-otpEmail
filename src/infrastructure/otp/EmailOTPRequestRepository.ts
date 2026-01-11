@@ -1,37 +1,31 @@
 import { EmailOTPRequest } from '../../domain/entities/EmailOTPRequest.js'
 import { Email } from '../../domain/valueObjects/Email.js'
 
-export type EmailOTPRequestRepositoryResult = {
-  repository: EmailOTPRequestRepository
-  request: EmailOTPRequest
-}
-
 export interface EmailOTPRequestRepository {
-  create(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult
+  create(params: { request: EmailOTPRequest }): EmailOTPRequest
   read(params: { request: EmailOTPRequest }): EmailOTPRequest
   readLatestByEmail(params: {
     email: Email
   }): { request: EmailOTPRequest; count: number } | null
-  update(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult
-  delete(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult
+  update(params: { request: EmailOTPRequest }): EmailOTPRequest
+  delete(params: { request: EmailOTPRequest }): EmailOTPRequest
 }
 
 export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestRepository {
   private readonly items: Map<string, EmailOTPRequest>
 
-  constructor(params?: { items?: Map<string, EmailOTPRequest> }) {
-    this.items = new Map(params?.items ?? [])
+  constructor(params: { items: Map<string, EmailOTPRequest> }) {
+    this.items = params.items
   }
 
-  create(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult {
+  create(params: { request: EmailOTPRequest }): EmailOTPRequest {
     const { request } = params
     const key = this.buildKey({ request })
     if (this.items.has(key)) {
       throw new Error('Email OTP request already exists')
     }
-    const nextItems = new Map(this.items)
-    nextItems.set(key, request)
-    return { repository: new InMemoryEmailOTPRequestRepository({ items: nextItems }), request }
+    this.items.set(key, request)
+    return request
   }
 
   read(params: { request: EmailOTPRequest }): EmailOTPRequest {
@@ -62,26 +56,24 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
     return { request: latest, count: matches.length }
   }
 
-  update(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult {
+  update(params: { request: EmailOTPRequest }): EmailOTPRequest {
     const { request } = params
     const key = this.buildKey({ request })
     if (!this.items.has(key)) {
       throw new Error('Email OTP request not found')
     }
-    const nextItems = new Map(this.items)
-    nextItems.set(key, request)
-    return { repository: new InMemoryEmailOTPRequestRepository({ items: nextItems }), request }
+    this.items.set(key, request)
+    return request
   }
 
-  delete(params: { request: EmailOTPRequest }): EmailOTPRequestRepositoryResult {
+  delete(params: { request: EmailOTPRequest }): EmailOTPRequest {
     const { request } = params
     const key = this.buildKey({ request })
     if (!this.items.has(key)) {
       throw new Error('Email OTP request not found')
     }
-    const nextItems = new Map(this.items)
-    nextItems.delete(key)
-    return { repository: new InMemoryEmailOTPRequestRepository({ items: nextItems }), request }
+    this.items.delete(key)
+    return request
   }
 
   private buildKey(params: { request: EmailOTPRequest }): string {
@@ -89,3 +81,14 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
     return `${request.getEmail().getValue()}::${request.getRequestedAt().toISOString()}`
   }
 }
+
+export type InMemoryEmailOTPRequestState = Map<string, EmailOTPRequest>
+
+const inMemoryEmailOtpRequests: InMemoryEmailOTPRequestState = new Map()
+
+export const createInMemoryEmailOTPRequestRepository = (params?: {
+  state?: InMemoryEmailOTPRequestState
+}): EmailOTPRequestRepository =>
+  new InMemoryEmailOTPRequestRepository({
+    items: params?.state ?? inMemoryEmailOtpRequests,
+  })
