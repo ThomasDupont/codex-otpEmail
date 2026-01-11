@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { INVALID_EMAIL } from '../errors.js'
 import { Email } from './Email.js'
 
 describe('Email', () => {
@@ -18,7 +19,7 @@ describe('Email', () => {
     const invalidEmail = 'not-an-email'
 
     // Act + Assert
-    expect(() => Email.create(invalidEmail)).toThrow('Invalid email')
+    expect(() => Email.create(invalidEmail)).toThrow(INVALID_EMAIL)
   })
 
   it('compares emails by value', () => {

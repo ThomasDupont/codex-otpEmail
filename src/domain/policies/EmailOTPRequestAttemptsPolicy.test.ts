@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { OTP_REQUEST_OUT_OF_DELAY } from '../errors.js'
 import { EmailOTPRequestAttemptsPolicy } from './EmailOTPRequestAttemptsPolicy.js'
 
 describe('EmailOTPRequestAttemptsPolicy', () => {
@@ -35,6 +36,6 @@ describe('EmailOTPRequestAttemptsPolicy', () => {
     // Act + Assert
     expect(() =>
       policy.assertCanRequest(11, lastRequestedAt, now),
-    ).toThrow('Hors delai pour la demande')
-  })
+    ).toThrow(OTP_REQUEST_OUT_OF_DELAY)
+})
 })

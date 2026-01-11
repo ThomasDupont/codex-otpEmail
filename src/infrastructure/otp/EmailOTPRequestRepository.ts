@@ -1,3 +1,7 @@
+import {
+  OTP_REQUEST_ALREADY_EXISTS,
+  OTP_REQUEST_NOT_FOUND,
+} from '../../domain/errors.js'
 import { EmailOTPRequest } from '../../domain/entities/EmailOTPRequest.js'
 import { Email } from '../../domain/valueObjects/Email.js'
 
@@ -22,7 +26,7 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
     const { request } = params
     const key = this.buildKey({ request })
     if (this.items.has(key)) {
-      throw new Error('Email OTP request already exists')
+      throw new Error(OTP_REQUEST_ALREADY_EXISTS)
     }
     this.items.set(key, request)
     return request
@@ -33,7 +37,7 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
     const key = this.buildKey({ request })
     const stored = this.items.get(key)
     if (!stored) {
-      throw new Error('Email OTP request not found')
+      throw new Error(OTP_REQUEST_NOT_FOUND)
     }
     return stored
   }
@@ -60,7 +64,7 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
     const { request } = params
     const key = this.buildKey({ request })
     if (!this.items.has(key)) {
-      throw new Error('Email OTP request not found')
+      throw new Error(OTP_REQUEST_NOT_FOUND)
     }
     this.items.set(key, request)
     return request
@@ -70,7 +74,7 @@ export class InMemoryEmailOTPRequestRepository implements EmailOTPRequestReposit
     const { request } = params
     const key = this.buildKey({ request })
     if (!this.items.has(key)) {
-      throw new Error('Email OTP request not found')
+      throw new Error(OTP_REQUEST_NOT_FOUND)
     }
     this.items.delete(key)
     return request

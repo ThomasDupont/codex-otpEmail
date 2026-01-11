@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { OTP_REQUEST_OUT_OF_DELAY } from '../errors.js'
 import { EmailOTPRequestPolicy } from './EmailOTPRequestPolicy.js'
 
 describe('EmailOTPRequestPolicy', () => {
@@ -39,7 +40,7 @@ describe('EmailOTPRequestPolicy', () => {
     // Act + Assert
     expect(() =>
       policy.assertCanRequest(1, lastRequestedAt, now),
-    ).toThrow('Hors delai pour la demande')
+    ).toThrow(OTP_REQUEST_OUT_OF_DELAY)
   })
 
   it('throws when the fourth request is made before 60 minutes', () => {
@@ -51,6 +52,6 @@ describe('EmailOTPRequestPolicy', () => {
     // Act + Assert
     expect(() =>
       policy.assertCanRequest(3, lastRequestedAt, now),
-    ).toThrow('Hors delai pour la demande')
-  })
+    ).toThrow(OTP_REQUEST_OUT_OF_DELAY)
+})
 })

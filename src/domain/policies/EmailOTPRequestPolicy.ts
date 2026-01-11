@@ -1,3 +1,8 @@
+import {
+  OTP_REQUEST_OUT_OF_DELAY,
+  REQUEST_COUNT_MUST_BE_NON_NEGATIVE,
+} from '../errors.js'
+
 const INITIAL_DELAY_MS = 120 * 1000
 const LONG_DELAY_MS = 60 * 60 * 1000
 const MAX_SHORT_DELAY_REQUESTS = 2
@@ -5,7 +10,7 @@ const MAX_SHORT_DELAY_REQUESTS = 2
 export class EmailOTPRequestPolicy {
   getNextDelayMs(previousRequestCount: number): number {
     if (previousRequestCount < 0) {
-      throw new Error('Request count must be non-negative')
+      throw new Error(REQUEST_COUNT_MUST_BE_NON_NEGATIVE)
     }
     if (previousRequestCount === 0) {
       return 0
@@ -23,7 +28,7 @@ export class EmailOTPRequestPolicy {
     }
     const nextAllowedAt = lastRequestedAt.getTime() + requiredDelayMs
     if (now.getTime() < nextAllowedAt) {
-      throw new Error('Hors delai pour la demande')
-    }
+      throw new Error(OTP_REQUEST_OUT_OF_DELAY)
   }
+}
 }

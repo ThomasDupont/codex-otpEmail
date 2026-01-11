@@ -1,3 +1,5 @@
+import { INVALID_EMAIL } from '../errors.js'
+
 export class Email {
   private readonly value: string
 
@@ -8,7 +10,7 @@ export class Email {
   static create(raw: string): Email {
     const normalized = raw.trim().toLowerCase()
     if (!Email.isValid(normalized)) {
-      throw new Error('Invalid email')
+      throw new Error(INVALID_EMAIL)
     }
     return new Email(normalized)
   }

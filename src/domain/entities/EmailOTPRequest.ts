@@ -1,8 +1,9 @@
+import { timingSafeEqual } from 'node:crypto'
 import { Email } from '../valueObjects/Email.js'
 import { EmailOTPRequestPolicy } from '../policies/EmailOTPRequestPolicy.js'
-import { timingSafeEqual } from 'node:crypto'
 import { EmailOTPRequestAttemptsPolicy } from '../policies/EmailOTPRequestAttemptsPolicy.js'
 import { EmailOTPRequestValidationPolicy } from '../policies/EmailOTPRequestValidationPolicy.js'
+import { LAST_REQUEST_DATE_REQUIRED } from '../errors.js'
 
 const VALIDITY_DURATION_MS = 60 * 60 * 1000
 
@@ -63,7 +64,7 @@ export class EmailOTPRequest {
     const attemptsDelayMs = attemptsPolicy.getDelayMs(previousFailedAttempts)
     if (previousRequestCount > 0 || attemptsDelayMs > 0) {
       if (!lastRequestedAt) {
-        throw new Error('Last request date is required')
+        throw new Error(LAST_REQUEST_DATE_REQUIRED)
       }
       if (previousRequestCount > 0) {
         policy.assertCanRequest(previousRequestCount, lastRequestedAt, requestedAt)

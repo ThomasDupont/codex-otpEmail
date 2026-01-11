@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { OTP_REQUEST_NOT_FOUND } from '../../domain/errors.js'
 import { Email } from '../../domain/valueObjects/Email.js'
 import { EmailOTPRequest } from '../../domain/entities/EmailOTPRequest.js'
 import { createInMemoryEmailOTPRequestRepository } from './EmailOTPRequestRepository.js'
@@ -58,9 +59,7 @@ describe('InMemoryEmailOTPRequestRepository', () => {
     repository.delete({ request })
 
     // Assert
-    expect(() => repository.read({ request })).toThrow(
-      'Email OTP request not found',
-    )
+    expect(() => repository.read({ request })).toThrow(OTP_REQUEST_NOT_FOUND)
   })
 
   it('reads the latest request for an email', () => {

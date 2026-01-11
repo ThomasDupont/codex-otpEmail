@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MAX_ATTEMPTS_REACHED } from '../errors.js'
 import { EmailOTPRequestValidationPolicy } from './EmailOTPRequestValidationPolicy.js'
 
 describe('EmailOTPRequestValidationPolicy', () => {
@@ -18,8 +19,6 @@ describe('EmailOTPRequestValidationPolicy', () => {
     const policy = new EmailOTPRequestValidationPolicy()
 
     // Act + Assert
-    expect(() => policy.assertCanValidate(10)).toThrow(
-      'Nombre maximum de tentatives atteint',
-    )
+    expect(() => policy.assertCanValidate(10)).toThrow(MAX_ATTEMPTS_REACHED)
   })
 })

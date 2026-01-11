@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MAX_ATTEMPTS_REACHED, OTP_REQUEST_OUT_OF_DELAY } from '../errors.js'
 import { Email } from '../valueObjects/Email.js'
 import { EmailOTPRequest } from './EmailOTPRequest.js'
 
@@ -67,7 +68,7 @@ describe('EmailOTPRequest', () => {
         passcode,
         failedAttempts,
       }),
-    ).toThrow('Hors delai pour la demande')
+    ).toThrow(OTP_REQUEST_OUT_OF_DELAY)
   })
 
   it('throws for a fourth request outside the allowed delay', () => {
@@ -88,7 +89,7 @@ describe('EmailOTPRequest', () => {
         passcode,
         failedAttempts,
       }),
-    ).toThrow('Hors delai pour la demande')
+    ).toThrow(OTP_REQUEST_OUT_OF_DELAY)
   })
 
   it('throws when attempts exceed the limit before 60 minutes', () => {
@@ -110,7 +111,7 @@ describe('EmailOTPRequest', () => {
         passcode,
         failedAttempts,
       }),
-    ).toThrow('Hors delai pour la demande')
+    ).toThrow(OTP_REQUEST_OUT_OF_DELAY)
   })
 
   it('allows a new request after 60 minutes and returns the normal delay', () => {
@@ -214,7 +215,7 @@ describe('EmailOTPRequest', () => {
 
     // Assert
     expect(() => request.validate({ inputPasscode: '654321' })).toThrow(
-      'Nombre maximum de tentatives atteint',
+      MAX_ATTEMPTS_REACHED,
     )
   })
 
