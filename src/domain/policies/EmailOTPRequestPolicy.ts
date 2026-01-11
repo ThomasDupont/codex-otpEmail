@@ -1,11 +1,12 @@
 import {
+  OTP_REQUEST_LONG_DELAY_MS,
+  OTP_REQUEST_INITIAL_DELAY_MS,
+  OTP_REQUEST_MAX_SHORT_DELAY_COUNT,
+} from '../configuration.js'
+import {
   OTP_REQUEST_OUT_OF_DELAY,
   REQUEST_COUNT_MUST_BE_NON_NEGATIVE,
 } from '../errors.js'
-
-const INITIAL_DELAY_MS = 120 * 1000
-const LONG_DELAY_MS = 60 * 60 * 1000
-const MAX_SHORT_DELAY_REQUESTS = 2
 
 export class EmailOTPRequestPolicy {
   getNextDelayMs(previousRequestCount: number): number {
@@ -15,10 +16,10 @@ export class EmailOTPRequestPolicy {
     if (previousRequestCount === 0) {
       return 0
     }
-    if (previousRequestCount <= MAX_SHORT_DELAY_REQUESTS) {
-      return INITIAL_DELAY_MS
+    if (previousRequestCount <= OTP_REQUEST_MAX_SHORT_DELAY_COUNT) {
+      return OTP_REQUEST_INITIAL_DELAY_MS
     }
-    return LONG_DELAY_MS
+    return OTP_REQUEST_LONG_DELAY_MS
   }
 
   assertCanRequest(previousRequestCount: number, lastRequestedAt: Date, now: Date): void {

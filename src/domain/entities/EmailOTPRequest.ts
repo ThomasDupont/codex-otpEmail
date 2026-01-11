@@ -1,11 +1,10 @@
-import { timingSafeEqual } from 'node:crypto'
 import { Email } from '../valueObjects/Email.js'
+import { timingSafeEqual } from 'node:crypto'
+import { OTP_VALIDITY_DURATION_MS } from '../configuration.js'
 import { EmailOTPRequestPolicy } from '../policies/EmailOTPRequestPolicy.js'
 import { EmailOTPRequestAttemptsPolicy } from '../policies/EmailOTPRequestAttemptsPolicy.js'
 import { EmailOTPRequestValidationPolicy } from '../policies/EmailOTPRequestValidationPolicy.js'
 import { LAST_REQUEST_DATE_REQUIRED } from '../errors.js'
-
-const VALIDITY_DURATION_MS = 60 * 60 * 1000
 
 export class EmailOTPRequest {
   private readonly email: Email
@@ -35,7 +34,7 @@ export class EmailOTPRequest {
     failedAttempts: number
   }): EmailOTPRequest {
     const { email, requestedAt, passcode, failedAttempts } = params
-    const expiresAt = new Date(requestedAt.getTime() + VALIDITY_DURATION_MS)
+    const expiresAt = new Date(requestedAt.getTime() + OTP_VALIDITY_DURATION_MS)
     return new EmailOTPRequest(email, requestedAt, expiresAt, passcode, failedAttempts)
   }
 
