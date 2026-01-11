@@ -1,8 +1,6 @@
 import express from 'express'
-import { randomInt } from 'node:crypto'
 import { registerPingRoute } from './application/http/pingRoute.js'
 import { registerOtpRoutes } from './application/http/otpRoutes.js'
-import { createInMemoryEmailOTPRequestRepository } from './infrastructure/otp/EmailOTPRequestRepository.js'
 
 const app = express()
 app.use(express.json())
@@ -10,9 +8,6 @@ app.use(express.json())
 registerPingRoute(app)
 registerOtpRoutes({
   app,
-  repository: createInMemoryEmailOTPRequestRepository(),
-  clock: { now: () => new Date() },
-  passcodeGenerator: () => String(randomInt(100000, 1000000)),
 })
 
 const port = 3000

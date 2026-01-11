@@ -1,39 +1,18 @@
 import type { Express } from 'express'
-import { Email } from '../../domain/valueObjects/Email.js'
-import type { EmailOTPRequestRepository } from '../../infrastructure/otp/EmailOTPRequestRepository.js'
-import type { Clock } from '../otp/otpService.js'
-import { createOtpRequest, validateOtpRequest } from '../otp/otpService.js'
+import { createOtpUseCases } from '../usecases/otpUseCases.js'
 
 export const registerOtpRoutes = (params: {
   app: Express
-  repository: EmailOTPRequestRepository
-  clock: Clock
-  passcodeGenerator: () => string
 }): void => {
-  const { app, clock, passcodeGenerator, repository } = params
+  const { app } = params
+  const { requestOtp, validateOtp } = createOtpUseCases()
 
   app.post('/otp/request', (req, res) => {
     try {
       const body = req.body as {
         email: string
       }
-      const emailValue = Email.create(body.email)
-      const latest = repository.readLatestByEmail({ email: emailValue })
-
-      console.log('Latest request:', latest)
-      const previousRequestCount = latest?.count ?? 0
-      const previousFailedAttempts = latest?.request.getFailedAttempts() ?? 0
-      const lastRequestedAt = latest?.request.getRequestedAt()
-      const requestParams = {
-        email: body.email,
-        previousRequestCount,
-        previousFailedAttempts,
-        repository,
-        clock,
-        passcodeGenerator,
-        ...(lastRequestedAt ? { lastRequestedAt } : {}),
-      }
-      const result = createOtpRequest(requestParams)
+      const result = requestOtp({ email: body.email })
       res.json({
         email: result.request.getEmail().getValue(),
         requestedAt: result.request.getRequestedAt().toISOString(),
@@ -55,11 +34,10 @@ export const registerOtpRoutes = (params: {
         requestedAt: string
         inputPasscode: string
       }
-      const result = validateOtpRequest({
+      const result = validateOtp({
         email: body.email,
         requestedAt: new Date(body.requestedAt),
         inputPasscode: body.inputPasscode,
-        repository,
       })
       res.json({
         isValid: result.isValid,
