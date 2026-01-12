@@ -17,7 +17,6 @@ export const registerOtpRoutes = (params: {
         email: result.request.getEmail().getValue(),
         requestedAt: result.request.getRequestedAt().toISOString(),
         expiresAt: result.request.getExpiresAt().toISOString(),
-        passcode: result.request.getPasscode(),
         waitMs: result.waitMs,
         nextAllowedAt: result.nextAllowedAt.toISOString(),
       })
